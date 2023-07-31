@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="sound.js"></script>
+</head>
+
+<body onload="startGame()">
+    <canvas id="canvas" width="1000" height="560" onclick="upbird(event)">
+    </canvas>
+    <div id="gameover" style="font-size: xx-large; position: absolute;
+    color: brown;
+     left: 400px; top: 300px; display: none;">Game over!</div>
+    <script>
+        function pos() {
+            return Math.random() * H * 0.6 + 50
+        }
+        var W = 1000
+        var H = 560
+        var h1 = [pos(), pos(), pos(), pos(), pos(), pos(), pos(), pos(), pos(), pos()]
+        var h2 = 0.4 * H
+        var counter = 0
+        var canvas = document.getElementById("canvas")
+        var birdX = 300
+        var mySound;
+        var mySound2;
+        score = -2.5
+        var columnWidth = 50
+        var cloud1X = 1000
+        var cloud4X = 300
+        if (canvas.getContext) {
+            var context = canvas.getContext("2d");
+        } else {
+            console.error("不支持getContext");
+        }
+        //报告鼠标位置
+        function showCoords(evt) {
+            console.log(
+                'clientX value: ' + evt.clientX + '\n' +
+                'clientY value: ' + evt.clientY + '\n'
+            );
+        }
+        var y = 100
+        var xPillar = 1000
+        function clear(ctx) {
+            ctx.beginPath();
+            ctx.fillStyle = "rgba(255, 255, 255, 255)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.stroke();
+        }
+        function draw(y) {
+            //蓝天
+            //context.fillStyle = 'rgba(108,159,237,1)';
+            //context.fillRect(100, 20, canvas.clientWidth, canvas.clientHeight)
+            blueSky = new Image();
+            blueSky.src = "纯蓝天.jpg"
+            context.drawImage(blueSky, 100, 20, canvas.clientWidth, canvas.clientHeight);
+            //白云
+            cloud1 = new Image();
+            cloud4 = new Image();
+            cloud1.src = "云1.png"
+            cloud4.src = "云4.png"
+            context.drawImage(cloud1, cloud1X, 100, 140, 80);
+            context.drawImage(cloud4, cloud4X, 60, 65, 50);
+            if (cloud1X > 160) {
+                cloud1X = cloud1X - 2
+            } else {
+                cloud1X = 1000
+            }
+            if (cloud4X < 1000) {
+                cloud4X = cloud4X + 10
+            } else {
+                cloud4X = 160
+            }
+            //小鸟
+            bird1 = new Image();
+            bird1.src = "bird" + (counter % 4) + ".png"
+            context.drawImage(bird1, birdX, y, 60, 60)
+            counter = counter + 1
+            //柱子生成
+            /*context.fillStyle = 'black'
+            for (var i = 0; i < h1.length; i++) {
+                drawColumn(context, (xPillar % 1000) + i * 200, h1[i], h2)
+            }*/
+
+            //context.drawImage(column1, (xPillar % 1000) + i * 200, h1[i], h2)
+            var pillarDistance1 = 200 * h1.length
+            console.log("柱子间距" + pillarDistance1)
+            for (var i = 0; i < h1.length; i++) {
+                drawColumn(context, xPillar % pillarDistance1 + i * 200, h1[i], h2, pillarDistance1)
+                //debugger
+            }
+        }
+        function drawColumn(context, xPillar, h1, h2, pillarDistance1) {
+
+            if (xPillar < 80) xPillar += pillarDistance1
+            column1 = new Image();
+            column2 = new Image();
+            column3 = new Image();
+            column1.src = "柱子1小.png"
+            column2.src = "柱子1小反.png"
+            column3.src = "柱子1柱身.png"
+            //context.fillRect(xPillar, 20, columnWidth, h1)
+            //context.fillRect(xPillar, h1 + h2, columnWidth, H)
+            context.drawImage(column3, xPillar, 20, columnWidth, h1 - columnWidth)
+            context.drawImage(column2, xPillar, 20 + h1 - columnWidth, columnWidth, columnWidth)
+            context.drawImage(column1, xPillar, h1 + h2, columnWidth, columnWidth)
+            context.drawImage(column3, xPillar, h1 + h2 + columnWidth, columnWidth, H - columnWidth)
+            /*if (inRectangle(xPillar, 0, xPillar + columnWidth, h1, birdX, y)
+                || inRectangle(xPillar, h1 + h2, xPillar + columnWidth, h1 + h2 + H, birdX, y)) {
+                gameover = true
+            }*/
+
+
+            //碰撞判定1
+            var circleBird = { x: birdX + 20, y: y + 20, r: 12 };//r=20
+            var pillarUp = { x: xPillar, y: 20, w: columnWidth, h: h1 };
+            var pillarDown = { x: xPillar, y: h1 + h2, w: columnWidth, h: H };
+            if (RectCircleColliding(circleBird, pillarUp)
+                || RectCircleColliding(circleBird, pillarDown)) {
+                gameover = true
+                mySound.play();
+            }
+        }
+
+        //游戏结束
+        gameover = false
+        //小鸟下落
+        var birdfly = setInterval(function () {
+            if (gameover) {
+                clearInterval(birdfly);
+                //alert("游戏结束，刷新以重来")
+                var g = document.getElementById("gameover")
+                g.innerHTML = "游戏结束，刷新以重来"
+                g.style.display = ""
+                return;
+            }
+            y = y + 8
+            clear(context)
+            draw(y)
+            xPillar = xPillar - 10
+            score = score + 0.05
+            write(score)
+
+            console.log(y)
+            if (y < 35 || y > 520) {
+                gameover = true
+            }
+        }, 50)
+        //小鸟向上
+        upbird = function (event) {
+            clientX = event.clientX + '\n'
+            clientY = event.clientY + '\n'
+            if (100 < clientX && clientX < 100 + canvas.clientWidth) {
+                showCoords(event)
+                y = y - 60
+                console.log("第二个", y, event)
+                mySound2.play();
+            }
+        }
+        //碰撞判定2
+        /*function inRectangle(x1, y1, x2, y2, x0, y0) {
+            return x1 < x0 && x0 < x2 && y1 < y0 && y0 < y2
+        }*/
+        function RectCircleColliding(circle, rect) {
+            var distX = Math.abs(circle.x - rect.x - rect.w / 2);
+            var distY = Math.abs(circle.y - rect.y - rect.h / 2);
+
+            if (distX > (rect.w / 2 + circle.r)) { return false; }
+            if (distY > (rect.h / 2 + circle.r)) { return false; }
+            if (distX <= (rect.w / 2)) { return true; }
+            if (distY <= (rect.h / 2)) { return true; }
+
+            var dx = distX - rect.w / 2;
+            var dy = distY - rect.h / 2;
+            return (dx * dx + dy * dy <= (circle.r * circle.r));
+        }
+        //计分
+        function write(score) {
+            if (score > 0) {
+                context.fillText(Math.floor(score), 200, 100)
+            }
+        }
+        //音效
+        function startGame() {
+            mySound = new sound("撞柱子音效.wav");
+            mySound2 = new sound("点击音效.wav");
+        }
+
+    </script>
+</body>
+
+</html>

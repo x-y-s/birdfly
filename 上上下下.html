@@ -27,7 +27,8 @@
         var canvas = document.getElementById("canvas")
 
         var birdX = 300
-
+        
+        score = -2.5
         if (canvas.getContext) {
             var context = canvas.getContext("2d");
             // context.globalCompositeOperation="destination-over";
@@ -45,7 +46,7 @@
 
         var y = 100
         var x1 = 1000
-        var x2 = 1200
+        
         function clear(ctx) {
             ctx.beginPath();
             ctx.fillStyle = "rgba(255, 255, 255, 255)";
@@ -70,6 +71,7 @@
             bird1.src = "bird" + (counter % 4) + ".png"
             context.drawImage(bird1, birdX, y, 60, 60)
             counter = counter + 1
+            //debugger
             /*许多柱子，竖长的长方形，中间有一个断层，匀速向左移动
             context.fillStyle='black'
             if (x1>80){
@@ -87,21 +89,19 @@
                 x2=800
             }
             */
+            
             //柱子生成
-
             context.fillStyle = 'black'
-
             for (var i = 0; i < h1.length; i++) {
                 drawColumn(context, (x1 % 1000) + i * 200, h1[i], h2)
             }
-
         }
 
 
         function drawColumn(context, x1, h1, h2) {
             var columnWidth = 50
             if (x1 < 80) x1 += 1000
-            context.fillRect(x1, 0, columnWidth, h1)
+            context.fillRect(x1, 20, columnWidth, h1)
             context.fillRect(x1, h1 + h2, columnWidth, H)
             if (inRectangle(x1, 0, x1 + columnWidth, h1, birdX, y)
                 || inRectangle(x1, h1 + h2, x1 + columnWidth, h1 + h2 + H, birdX, y)) {
@@ -122,7 +122,9 @@
             clear(context)
             draw(y)
             x1 = x1 - 10
-            x2 = x2 - 10
+            score = score + 0.05
+            write(score)
+            
             console.log(y)
             if (y < 35 || y > 520) {
                 gameover = true
@@ -142,9 +144,12 @@
         function inRectangle(x1, y1, x2, y2, x0, y0) {
             return x1 < x0 && x0 < x2 && y1 < y0 && y0 < y2
         }
-
-
-
+        
+        function write (score) {
+            if (score>0) {
+            context.fillText (Math.floor(score),200,100)
+            }
+        }
 
     </script>
 </body>
