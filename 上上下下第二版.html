@@ -12,8 +12,12 @@
     <canvas id="canvas" width="1000" height="560" onclick="upbird(event)">
     </canvas>
     <div id="gameover" style="font-size: xx-large; position: absolute;
-    color: brown;
-     left: 400px; top: 300px; display: none;">Game over!</div>
+    background-color: chocolate;
+    opacity: 0.8;
+    color: white;
+    width: 700px;
+    text-align: center;
+     left: 205px; top: 150px; display: none;">Game over!</div>
     <script>
         function pos() {
             return Math.random() * H * 0.6 + 50
@@ -21,7 +25,7 @@
         var W = 1000
         var H = 560
         var h1 = [pos(), pos(), pos(), pos(), pos(), pos(), pos(), pos(), pos(), pos()]
-        var h2 = 0.4 * H
+        var h2 = 0.5 * H
         var counter = 0
         var canvas = document.getElementById("canvas")
         var birdX = 300
@@ -38,10 +42,10 @@
         }
         //报告鼠标位置
         function showCoords(evt) {
-            console.log(
+            /*console.log(
                 'clientX value: ' + evt.clientX + '\n' +
                 'clientY value: ' + evt.clientY + '\n'
-            );
+            );*/
         }
         var y = 100
         var xPillar = 1000
@@ -88,8 +92,12 @@
 
             //context.drawImage(column1, (xPillar % 1000) + i * 200, h1[i], h2)
             var pillarDistance1 = 200 * h1.length
-            console.log("柱子间距" + pillarDistance1)
+            //console.log("柱子间距" + pillarDistance1)
             for (var i = 0; i < h1.length; i++) {
+                if (xPillar % pillarDistance1 + i * 200 > 800) {
+                    h1[i] = pos()
+                    console.log("h1[i]" + h1[i])
+                }
                 drawColumn(context, xPillar % pillarDistance1 + i * 200, h1[i], h2, pillarDistance1)
                 //debugger
             }
@@ -134,7 +142,7 @@
                 clearInterval(birdfly);
                 //alert("游戏结束，刷新以重来")
                 var g = document.getElementById("gameover")
-                g.innerHTML = "游戏结束，刷新以重来"
+                g.innerHTML = "<p>游戏结束，刷新以重来</p><p>本次得分" + Math.floor(score) + "</p>"
                 g.style.display = ""
                 return;
             }
@@ -144,8 +152,7 @@
             xPillar = xPillar - 10
             score = score + 0.05
             write(score)
-
-            console.log(y)
+            //console.log(y)
             if (y < 35 || y > 520) {
                 gameover = true
             }
@@ -157,7 +164,7 @@
             if (100 < clientX && clientX < 100 + canvas.clientWidth) {
                 showCoords(event)
                 y = y - 60
-                console.log("第二个", y, event)
+                //console.log("第二个", y, event)
                 mySound2.play();
             }
         }
